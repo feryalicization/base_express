@@ -3,6 +3,7 @@ const { PrismaClient } = require('@prisma/client')
 const bcrypt = require('bcrypt')
 const prisma = new PrismaClient()
 const CustomError = require('../helper/response')
+const jwt = require('jsonwebtoken')
 
 
 
@@ -29,10 +30,8 @@ class UserService {
             throw new CustomError('Email already exists', 400)
           }
       
-          // Hash the password before storing it
           const hashedPassword = await bcrypt.hash(password, 10)
       
-          // Create a new user in the database without specifying jurusan
           const newUser = await prisma.user.create({
             data: {
               username: username,
@@ -47,6 +46,7 @@ class UserService {
     }
   }
 
+  
   async listUsers() {
     try {
       const users = await prisma.user.findMany()
@@ -55,6 +55,52 @@ class UserService {
       throw error
     }
   }
+
+
+  async authenticateUser({ username, password }) {
+    const user = await prisma.user.findUnique({
+      where: {
+        username: username,
+      },
+    })
+
+    if (!user) {
+      throw new CustomError('Invalid username', 401)
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password)
+
+    if (!isPasswordValid) {
+      throw new CustomError('Invalid password', 401)
+    }
+
+    return user
+  }
+
+
+
+  async getUserById(userId) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+      })
+
+      if (!user) {
+        throw new CustomError('User not found', 404)
+      }
+
+      return user
+    } catch (error) {
+      throw error
+    }
+  }
+
+
+
+
+
 }
 
 module.exports = new UserService()

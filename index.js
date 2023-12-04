@@ -9,9 +9,8 @@ const port = process.env.PORT
 app.use(bodyParser.json())
 
 const Routes = require('./routes/user')
-const errorHandler = require('./routes/errorHandler') // Import the errorHandler
+const errorHandler = require('./routes/errorHandler') 
 
-// Use the custom error handling middleware
 app.use(errorHandler)
 
 app.use('/user', Routes)
