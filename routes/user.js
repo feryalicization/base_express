@@ -6,44 +6,97 @@ const jwt = require('jsonwebtoken')
 const jwtSecretKey = process.env.JWT_SECRET_KEY || 'putricantik'
 
 
-
-
+/**
+ * @swagger
+ * /user/list:
+ *   get:
+ *     summary: Get a list of users
+ *     description: Retrieve a list of users from the database.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successful response with user data
+ *       401:
+ *         description: Unauthorized - Token is missing or invalid
+ *       500:
+ *         description: Internal Server Error
+ */
 router.get('/list', async (req, res) => {
   try {
-    const token = req.headers.token
+    const token = req.headers.authorization;
 
     if (!token) {
-      throw new CustomError('Authorization token is missing', 401)
+      throw new CustomError('Authorization token is missing', 401);
     }
 
-    const decodedToken = jwt.verify(token, jwtSecretKey)
+    const decodedToken = jwt.verify(token, jwtSecretKey);
 
-    // console.log(decodedToken.jurusan)
+    // console.log(decodedToken.jurusan);
 
-    const users = await userService.listUsers()
+    const users = await userService.listUsers();
 
     res.json({
       code: res.statusCode,
       message: 'Success',
       data: users,
-    })
-    
+    });
   } catch (error) {
     if (error instanceof CustomError) {
       res.status(error.statusCode).json({
         code: res.statusCode,
         message: error.message,
         data: null,
-      })
+      });
     } else {
       res.status(500).json({
         code: res.statusCode,
         message: 'Internal Server Error',
         data: null,
-      })
+      });
     }
   }
-})
+});
+
+// ... rest of the code
+
+
+// router.get('/list', async (req, res) => {
+//   try {
+//     const token = req.headers.token
+
+//     if (!token) {
+//       throw new CustomError('Authorization token is missing', 401)
+//     }
+
+//     const decodedToken = jwt.verify(token, jwtSecretKey)
+
+//     // console.log(decodedToken.jurusan)
+
+//     const users = await userService.listUsers()
+
+//     res.json({
+//       code: res.statusCode,
+//       message: 'Success',
+//       data: users,
+//     })
+    
+//   } catch (error) {
+//     if (error instanceof CustomError) {
+//       res.status(error.statusCode).json({
+//         code: res.statusCode,
+//         message: error.message,
+//         data: null,
+//       })
+//     } else {
+//       res.status(500).json({
+//         code: res.statusCode,
+//         message: 'Internal Server Error',
+//         data: null,
+//       })
+//     }
+//   }
+// })
 
 
 
